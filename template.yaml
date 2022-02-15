@@ -1,0 +1,16 @@
+Transform: 'AWS::Serverless-2016-10-31'
+Description: An AWS Serverless Specification template describing your function.
+Resources:
+  Function:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: PocketReadtimeTagger
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Timeout: 30
+      Events:
+        Schedule:
+          Type: Schedule
+          Properties:
+            Name: WeeklySundayTwoPm
+            Schedule: cron(0 14 ? * SUN *)
