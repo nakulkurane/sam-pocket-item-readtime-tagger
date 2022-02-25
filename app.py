@@ -1,7 +1,6 @@
 from pocket import Pocket
 from datetime import datetime, timedelta
 import os
-import json
 
 def stamp_to_epoch(timestamp):
     year = int(timestamp[0:4])
