@@ -84,7 +84,7 @@ def tag_items(p):
 
                     p.tags_add(item_id=i, tags="article with video").commit()
 
-    print('Tagged items successfully')
+    print("Tagged", index+1, "items successfully")
 
 def main():
     p = authenticate()
