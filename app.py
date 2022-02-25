@@ -20,36 +20,29 @@ def authenticate():
     return p
 
 def tag_items(p):
-    '''
-    From how many days ago do you want to retrieve Pocket list items?
-    '''
-    days_prior_today = 1
+
+    # From how many days ago do you want to retrieve Pocket list items?
+    days_prior_today = 7
 
     days_from_today_stamp = datetime.now() - timedelta(days_prior_today)
 
     epoch_start_date_for_list = stamp_to_epoch(str(days_from_today_stamp))
 
-    # retrieves all my readings since 7 days ago
+    # retrieve all my unread saved articles from 7 days ago
     lis = p.get(since=epoch_start_date_for_list, state="unread")
 
     sub_list = lis[0]['list']
-
-    print(type(sub_list))
-
-
 
     '''
     Iterate through dictionary and remove items which were added before the specified date parameter.
     This is so we minimize the load on the Pocket tagging. Pocket's GET request will return
     all items last _updated_ after the time specified (which includes old items that may have been tagged the last time 
-    the funciton was run)
+    the function was run)
     '''
     # for k, v in list(sub_list.items()):
     #     if int(v['time_added']) <= epoch_start_date_for_list:
     #         # print (sub_dict[k]['item_id'])
     #         del sub_list[k]
-    with open("sample.json", "w") as outfile:
-        json.dump(sub_list, outfile)
     '''
     Iterate through the sub list and tag items accordingly
     '''
