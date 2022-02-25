@@ -39,10 +39,10 @@ def tag_items(p):
     all items last _updated_ after the time specified (which includes old items that may have been tagged the last time 
     the function was run)
     '''
-    # for k, v in list(sub_list.items()):
-    #     if int(v['time_added']) <= epoch_start_date_for_list:
-    #         # print (sub_dict[k]['item_id'])
-    #         del sub_list[k]
+    for k, v in list(sub_list.items()):
+        if int(v['time_added']) <= epoch_start_date_for_list:
+            # print (sub_dict[k]['item_id'])
+            del sub_list[k]
     '''
     Iterate through the sub list and tag items accordingly
     '''
