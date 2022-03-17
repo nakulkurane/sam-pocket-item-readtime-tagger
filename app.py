@@ -7,7 +7,7 @@ from botocore.exceptions import ClientError
 
 
 '''
-Boilerplate function to get a Secret from AWS SSM
+Boilerplate function to get a Secret from AWS Secrets Manager
 '''
 def get_secret(name):
     secret_name = name
@@ -52,7 +52,7 @@ def get_secret(name):
             # Deal with the exception here, and/or rethrow at your discretion.
             raise e
     else:
-        # Decrypts secret using the associated KMS CMK.
+        # Decrypts secret using the associated KMS key.
         # Depending on whether the secret is a string or binary, one of these fields will be populated.
         if 'SecretString' in get_secret_value_response:
             secret = get_secret_value_response['SecretString']
