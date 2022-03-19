@@ -4,7 +4,7 @@ Resources:
   Function:
     Type: 'AWS::Serverless::Function'
     Properties:
-      FunctionName: PocketReadtimeTagger
+      FunctionName: Weekly_Pocket_Readtime_Tagger
       Handler: app.lambda_handler
       Runtime: python3.9
       Timeout: 30
