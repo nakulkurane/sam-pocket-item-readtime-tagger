@@ -8,6 +8,8 @@ Resources:
       Handler: app.lambda_handler
       Runtime: python3.9
       Timeout: 30
+      Policies:
+        - SecretsManagerReadWrite
       Events:
         Schedule:
           Type: Schedule
