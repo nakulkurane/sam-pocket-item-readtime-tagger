@@ -1,10 +1,13 @@
 Transform: 'AWS::Serverless-2016-10-31'
-Description: An AWS Serverless Specification template describing your function.
+Description: >
+  SAM Template for Weekly_Pocket_Readtime_Tagger function. Includes function and cron schedule.
 Resources:
   Function:
     Type: 'AWS::Serverless::Function'
     Properties:
       FunctionName: Weekly_Pocket_Readtime_Tagger
+      Description: >
+        Lambda function which tags unread articles (saved in the last 7 days) in my Pocket based on read-time.
       Handler: app.lambda_handler
       Runtime: python3.9
       Timeout: 30
