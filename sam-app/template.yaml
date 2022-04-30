@@ -10,7 +10,7 @@ Resources:
         Lambda function which tags unread articles (saved in the last 7 days) in my Pocket based on read-time.
       Handler: app.lambda_handler
       Runtime: python3.9
-      Timeout: 30
+      Timeout: 300
       Policies:
         - SecretsManagerReadWrite
       Events:
@@ -19,3 +19,11 @@ Resources:
           Properties:
             Name: WeeklySundayTwoPm
             Schedule: cron(0 14 ? * SUN *)
+      Layers:
+        - !Ref libs
+  libs:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: pocket-readtime-tagger-layer
+      Description: Lambda layer with libs like pocket and datetime
+      ContentUri: ../libs
