@@ -5,6 +5,8 @@ Resources:
   Function:
     Type: 'AWS::Serverless::Function'
     Properties:
+      FunctionUrlConfig:
+        AuthType: NONE
       FunctionName: Weekly_Pocket_Readtime_Tagger
       Description: >
         Lambda function which tags unread articles (saved in the last 7 days) in my Pocket based on read-time.
@@ -27,3 +29,9 @@ Resources:
       LayerName: pocket-readtime-tagger-layer
       Description: Lambda layer with libs like pocket and datetime
       ContentUri: ../libs
+
+Outputs:
+  MyFunctionUrlEndpoint:
+      Description: "My Lambda Function URL Endpoint"
+      Value:
+        Fn::GetAtt: FunctionUrl.FunctionUrl
