@@ -1,6 +1,6 @@
 from pocket import Pocket
 from datetime import datetime, timedelta
-import os
+import json
 import base64
 import boto3
 from botocore.exceptions import ClientError
@@ -80,7 +80,7 @@ def authenticate():
 def tag_items(p):
 
     # From how many days ago do you want to retrieve Pocket list items?
-    days_prior_today = 7
+    days_prior_today = 2
 
     days_from_today_stamp = datetime.now() - timedelta(days_prior_today)
 
@@ -104,6 +104,7 @@ def tag_items(p):
     '''
     Iterate through the sub list and tag items accordingly
     '''
+    items = 0
     for index, i in enumerate(sub_list):
         print(index+1, "out of", len(sub_list))
         if 'is_article' in sub_list[str(i)].keys() or 'has_video' in sub_list[str(i)].keys():
@@ -141,12 +142,14 @@ def tag_items(p):
                     print("tagging item", i, index+1, "out of", len(sub_list))
 
                     p.tags_add(item_id=i, tags="article with video").commit()
-
-    print("Tagged", index+1, "items successfully")
+        items += 1
+    print("Tagged", items, "items successfully")
+    return items
 
 def main():
     p = authenticate()
-    tag_items(p)
+    items = tag_items(p)
+    return items
 
 
 if __name__ == '__main__':
@@ -154,4 +157,9 @@ if __name__ == '__main__':
 
 
 def lambda_handler(event, context):
-    main()
+    num_items = main()
+    phrase = "Tagged " + \
+             str(num_items) + \
+             " items successfully"
+
+    return phrase
