@@ -79,7 +79,7 @@ def authenticate():
 def tag_items(p):
 
     # From how many days ago do you want to retrieve Pocket list items?
-    days_prior_today = 2
+    days_prior_today = 7
 
     days_from_today_stamp = datetime.now() - timedelta(days_prior_today)
 
