@@ -1,6 +1,5 @@
 from pocket import Pocket
 from datetime import datetime, timedelta
-import json
 import base64
 import boto3
 from botocore.exceptions import ClientError
@@ -87,64 +86,73 @@ def tag_items(p):
     epoch_start_date_for_list = stamp_to_epoch(str(days_from_today_stamp))
 
     # retrieve all my unread saved articles from 7 days ago
-    lis = p.get(since=epoch_start_date_for_list, state="unread")
+    lis = p.get(since=epoch_start_date_for_list, state="unread", tag="_untagged_")
 
     sub_list = lis[0]['list']
+    # print('length of sub list is')
+    # print (len(sub_list))
+    if len(sub_list) > 0:
+        '''
+        Iterate through dictionary and remove items which were added before the specified date parameter.
+        This is so we minimize the load on the Pocket tagging. Pocket's GET request will return
+        all items last _updated_ after the time specified (which includes old items that may have been tagged the last time 
+        the function was run)
+        '''
+        for k, v in list(sub_list.items()):
+            if int(v['time_added']) <= epoch_start_date_for_list:
+                # print (sub_list[k]['tags'])
+                del sub_list[k]
 
-    '''
-    Iterate through dictionary and remove items which were added before the specified date parameter.
-    This is so we minimize the load on the Pocket tagging. Pocket's GET request will return
-    all items last _updated_ after the time specified (which includes old items that may have been tagged the last time 
-    the function was run)
-    '''
-    for k, v in list(sub_list.items()):
-        if int(v['time_added']) <= epoch_start_date_for_list:
-            # print (sub_dict[k]['item_id'])
-            del sub_list[k]
-    '''
-    Iterate through the sub list and tag items accordingly
-    '''
-    items = 0
-    for index, i in enumerate(sub_list):
-        print(index+1, "out of", len(sub_list))
-        if 'is_article' in sub_list[str(i)].keys() or 'has_video' in sub_list[str(i)].keys():
-            # if item is an article outright OR item is def NOT a video (has_video value 0 means not a video, 1 means has
-            # a video, 2 means is a video
-            if (int(sub_list[str(i)]['is_article']) == 1 or int(sub_list[str(i)]['has_video']) == 0):
+        '''
+        Iterate through the sub list and tag items accordingly
+        '''
+        items = 0
+        for index, i in enumerate(sub_list):
+            print(index+1, "out of", len(sub_list))
+            # print (sub_list[index]['item_id'])
 
-                if 'top_image_url' in sub_list[str(i)].keys() and "ytimg" not in sub_list[str(i)]['top_image_url']:
+            if 'is_article' in sub_list[str(i)].keys() or 'has_video' in sub_list[str(i)].keys():
+                # if item is an article outright OR item is def NOT a video (has_video value 0 means not a video, 1 means has
+                # a video, 2 means is a video
+                if (int(sub_list[str(i)]['is_article']) == 1 or int(sub_list[str(i)]['has_video']) == 0):
 
-                    if 'time_to_read' in sub_list[str(i)].keys():
+                    if 'top_image_url' in sub_list[str(i)].keys() and "ytimg" not in sub_list[str(i)]['top_image_url']:
 
-                        read_time = sub_list[str(i)]['time_to_read']
-                        print("tagging item", i, index+1, "out of", len(sub_list))
-                        if int(read_time) <= 2:
-                            p.tags_add(item_id=i, tags="a quick read").commit()
-                        elif read_time > 2 and read_time <= 5:
-                            p.tags_add(item_id=i, tags="a medium read").commit()
+                        if 'time_to_read' in sub_list[str(i)].keys():
+
+                            read_time = sub_list[str(i)]['time_to_read']
+                            print("tagging item", i, index+1, "out of", len(sub_list))
+                            if int(read_time) <= 2:
+                                p.tags_add(item_id=i, tags="a quick read").commit()
+                            elif read_time > 2 and read_time <= 5:
+                                p.tags_add(item_id=i, tags="a medium read").commit()
+                            else:
+                                p.tags_add(item_id=i, tags="a long read").commit()
+
                         else:
-                            p.tags_add(item_id=i, tags="a long read").commit()
 
-                    else:
+                            word_count = sub_list[str(i)]['word_count']
+                            read_time = int(word_count) / 250
+                            print("tagging item", i, index+1, "out of", len(sub_list))
 
-                        word_count = sub_list[str(i)]['word_count']
-                        read_time = int(word_count) / 250
+                            if read_time <= 2:
+                                p.tags_add(item_id=i, tags="a quick read").commit()
+                            elif read_time > 2 and read_time <= 5:
+                                p.tags_add(item_id=i, tags="a medium read").commit()
+                            else:
+                                p.tags_add(item_id=i, tags="a long read").commit()
+
+                    elif 'top_image_url' in sub_list[str(i)].keys() and "ytimg" in sub_list[str(i)]['top_image_url']:
                         print("tagging item", i, index+1, "out of", len(sub_list))
 
-                        if read_time <= 2:
-                            p.tags_add(item_id=i, tags="a quick read").commit()
-                        elif read_time > 2 and read_time <= 5:
-                            p.tags_add(item_id=i, tags="a medium read").commit()
-                        else:
-                            p.tags_add(item_id=i, tags="a long read").commit()
+                        p.tags_add(item_id=i, tags="article with video").commit()
+            items += 1
+        return items
+    else:
+        items = 0
+        return items
 
-                elif 'top_image_url' in sub_list[str(i)].keys() and "ytimg" in sub_list[str(i)]['top_image_url']:
-                    print("tagging item", i, index+1, "out of", len(sub_list))
 
-                    p.tags_add(item_id=i, tags="article with video").commit()
-        items += 1
-    print("Tagged", items, "items successfully")
-    return items
 
 def main():
     p = authenticate()
@@ -158,8 +166,11 @@ if __name__ == '__main__':
 
 def lambda_handler(event, context):
     num_items = main()
-    phrase = "Tagged " + \
-             str(num_items) + \
-             " items successfully"
+    if num_items > 0:
+        phrase = "Tagged " + \
+                 str(num_items) + \
+                 " items successfully"
+    else:
+        phrase = "No new/untagged items since last function invocation"
 
     return phrase
