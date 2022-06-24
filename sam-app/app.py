@@ -106,7 +106,7 @@ def tag_items(p):
         '''
         Iterate through the sub list and tag items accordingly
         '''
-        items = 0
+        tagged_items = 0
         for index, i in enumerate(sub_list):
             print("parsing item", index+1, "/", len(sub_list))
             # print (sub_list[index]['item_id'])
@@ -124,6 +124,8 @@ def tag_items(p):
 
                             read_time = sub_list[str(i)]['time_to_read']
                             print("TAGGING ITEM ID:", i, "INDEX", index+1, "/", len(sub_list))
+                            tagged_items += 1
+
                             if int(read_time) <= 2:
                                 p.tags_add(item_id=i, tags="a quick read").commit()
                             elif read_time > 2 and read_time <= 5:
@@ -136,6 +138,7 @@ def tag_items(p):
                             word_count = sub_list[str(i)]['word_count']
                             read_time = int(word_count) / 250
                             print("TAGGING ITEM ID:", i, "INDEX", index+1, "/", len(sub_list))
+                            tagged_items += 1
 
                             if read_time <= 2:
                                 p.tags_add(item_id=i, tags="a quick read").commit()
@@ -146,6 +149,7 @@ def tag_items(p):
 
                     elif 'top_image_url' in sub_list[str(i)].keys() and "ytimg" in sub_list[str(i)]['top_image_url']:
                         print("TAGGING ITEM ID:", i, "INDEX", index+1, "/", len(sub_list))
+                        tagged_items += 1
 
                         p.tags_add(item_id=i, tags="article with video").commit()
                     else:
@@ -155,11 +159,10 @@ def tag_items(p):
             else:
                 print("NOT TAGGING ITEM ID:", i, index + 1, "/", len(sub_list))
 
-            items += 1
-        return items
+        return tagged_items
     else:
-        items = 0
-        return items
+        tagged_items = 0
+        return tagged_items
 
 
 
