@@ -108,7 +108,7 @@ def tag_items(p):
         '''
         items = 0
         for index, i in enumerate(sub_list):
-            print(index+1, "out of", len(sub_list))
+            print("parsing item", index+1, "/", len(sub_list))
             # print (sub_list[index]['item_id'])
 
             if 'is_article' in sub_list[str(i)].keys() or 'has_video' in sub_list[str(i)].keys():
@@ -116,12 +116,14 @@ def tag_items(p):
                 # a video, 2 means is a video
                 if (int(sub_list[str(i)]['is_article']) == 1 or int(sub_list[str(i)]['has_video']) == 0):
 
-                    if 'top_image_url' in sub_list[str(i)].keys() and "ytimg" not in sub_list[str(i)]['top_image_url']:
+                    if ('top_image_url' in sub_list[str(i)].keys() and
+                        "ytimg" not in sub_list[str(i)]['top_image_url']) \
+                            or 'top_image_url' not in sub_list[str(i)].keys():
 
                         if 'time_to_read' in sub_list[str(i)].keys():
 
                             read_time = sub_list[str(i)]['time_to_read']
-                            print("tagging item", i, index+1, "out of", len(sub_list))
+                            print("TAGGING ITEM ID:", i, "INDEX", index+1, "/", len(sub_list))
                             if int(read_time) <= 2:
                                 p.tags_add(item_id=i, tags="a quick read").commit()
                             elif read_time > 2 and read_time <= 5:
@@ -133,7 +135,7 @@ def tag_items(p):
 
                             word_count = sub_list[str(i)]['word_count']
                             read_time = int(word_count) / 250
-                            print("tagging item", i, index+1, "out of", len(sub_list))
+                            print("TAGGING ITEM ID:", i, "INDEX", index+1, "/", len(sub_list))
 
                             if read_time <= 2:
                                 p.tags_add(item_id=i, tags="a quick read").commit()
@@ -143,9 +145,16 @@ def tag_items(p):
                                 p.tags_add(item_id=i, tags="a long read").commit()
 
                     elif 'top_image_url' in sub_list[str(i)].keys() and "ytimg" in sub_list[str(i)]['top_image_url']:
-                        print("tagging item", i, index+1, "out of", len(sub_list))
+                        print("TAGGING ITEM ID:", i, "INDEX", index+1, "/", len(sub_list))
 
                         p.tags_add(item_id=i, tags="article with video").commit()
+                    else:
+                        print("NOT TAGGING ITEM ID:", i, index + 1, "/", len(sub_list))
+                else:
+                    print("NOT TAGGING ITEM ID:", i, index + 1, "/", len(sub_list))
+            else:
+                print("NOT TAGGING ITEM ID:", i, index + 1, "/", len(sub_list))
+
             items += 1
         return items
     else:
