@@ -116,7 +116,9 @@ def tag_items(p):
                 # a video, 2 means is a video
                 if (int(sub_list[str(i)]['is_article']) == 1 or int(sub_list[str(i)]['has_video']) == 0):
 
-                    if 'top_image_url' in sub_list[str(i)].keys() and "ytimg" not in sub_list[str(i)]['top_image_url']:
+                    if ('top_image_url' in sub_list[str(i)].keys() and
+                        "ytimg" not in sub_list[str(i)]['top_image_url']) \
+                            or 'top_image_url' not in sub_list[str(i)].keys():
 
                         if 'time_to_read' in sub_list[str(i)].keys():
 
