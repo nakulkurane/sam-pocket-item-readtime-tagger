@@ -180,16 +180,35 @@ if __name__ == '__main__':
 
 def lambda_handler(event, context):
     tagged_items, total_items = main()
-    if tagged_items > 0:
+    if tagged_items == 1 and tagged_items == total_items:
+        phrase = "Tagged " + \
+                 str(tagged_items) + \
+                 " item successfully " + \
+            "out of " + str(total_items) + \
+                 " items"
+    elif tagged_items > 1 and tagged_items == total_items:
         phrase = "Tagged " + \
                  str(tagged_items) + \
                  " items successfully " + \
-            "out of " + str(total_items) + \
+                 "out of " + str(total_items) + \
                  " items"
+    elif tagged_items == 1 and tagged_items != total_items:
+        phrase = "Tagged " + \
+                 str(tagged_items) + \
+                 " items successfully " + \
+                 "out of " + str(total_items) + \
+                 " items. May be worth checking logs to see why they didn't " + \
+                 "get tagged!"
+    elif tagged_items > 1 and tagged_items != total_items:
+        phrase = "Tagged " + \
+                 str(tagged_items) + \
+                 " items successfully " + \
+                 "out of " + str(total_items) + \
+                 " items. May be worth checking logs to see why they didn't " + \
+                 "get tagged!"
     elif tagged_items == 0 and total_items > 0:
-        phrase = "No new/untagged items since last function invocation" + \
-            " though there were " + str(total_items) + \
-            " untagged items. May be worth checking logs why they didn't" + \
+        phrase = "There were " + str(total_items) + \
+            " new items but they did not get tagged. May be worth checking logs why they didn't" + \
             " get tagged!"
     else:
         phrase = "No new/untagged items since last function invocation"
