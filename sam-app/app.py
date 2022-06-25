@@ -106,9 +106,10 @@ def tag_items(p):
         '''
         Iterate through the sub list and tag items accordingly
         '''
-        items = 0
+        tagged_items = 0
+        total_items = len(sub_list)
         for index, i in enumerate(sub_list):
-            print("parsing item", index+1, "/", len(sub_list))
+            print("parsing item", index+1, "/", total_items)
             # print (sub_list[index]['item_id'])
 
             if 'is_article' in sub_list[str(i)].keys() or 'has_video' in sub_list[str(i)].keys():
@@ -123,7 +124,9 @@ def tag_items(p):
                         if 'time_to_read' in sub_list[str(i)].keys():
 
                             read_time = sub_list[str(i)]['time_to_read']
-                            print("TAGGING ITEM ID:", i, "INDEX", index+1, "/", len(sub_list))
+                            print("TAGGING ITEM ID:", i, "INDEX", index+1, "/", total_items)
+                            tagged_items += 1
+
                             if int(read_time) <= 2:
                                 p.tags_add(item_id=i, tags="a quick read").commit()
                             elif read_time > 2 and read_time <= 5:
@@ -135,7 +138,8 @@ def tag_items(p):
 
                             word_count = sub_list[str(i)]['word_count']
                             read_time = int(word_count) / 250
-                            print("TAGGING ITEM ID:", i, "INDEX", index+1, "/", len(sub_list))
+                            print("TAGGING ITEM ID:", i, "INDEX", index+1, "/", total_items)
+                            tagged_items += 1
 
                             if read_time <= 2:
                                 p.tags_add(item_id=i, tags="a quick read").commit()
@@ -145,28 +149,29 @@ def tag_items(p):
                                 p.tags_add(item_id=i, tags="a long read").commit()
 
                     elif 'top_image_url' in sub_list[str(i)].keys() and "ytimg" in sub_list[str(i)]['top_image_url']:
-                        print("TAGGING ITEM ID:", i, "INDEX", index+1, "/", len(sub_list))
+                        print("TAGGING ITEM ID:", i, "INDEX", index+1, "/", total_items)
+                        tagged_items += 1
 
                         p.tags_add(item_id=i, tags="article with video").commit()
                     else:
-                        print("NOT TAGGING ITEM ID:", i, index + 1, "/", len(sub_list))
+                        print("NOT TAGGING ITEM ID:", i, index + 1, "/", total_items)
                 else:
-                    print("NOT TAGGING ITEM ID:", i, index + 1, "/", len(sub_list))
+                    print("NOT TAGGING ITEM ID:", i, index + 1, "/", total_items)
             else:
-                print("NOT TAGGING ITEM ID:", i, index + 1, "/", len(sub_list))
+                print("NOT TAGGING ITEM ID:", i, index + 1, "/", total_items)
 
-            items += 1
-        return items
+        return tagged_items, total_items
     else:
-        items = 0
-        return items
+        tagged_items = 0
+        total_items = 0
+        return tagged_items, total_items
 
 
 
 def main():
     p = authenticate()
-    items = tag_items(p)
-    return items
+    tagged_items, total_items = tag_items(p)
+    return tagged_items, total_items
 
 
 if __name__ == '__main__':
@@ -174,11 +179,37 @@ if __name__ == '__main__':
 
 
 def lambda_handler(event, context):
-    num_items = main()
-    if num_items > 0:
+    tagged_items, total_items = main()
+    if tagged_items == 1 and tagged_items == total_items:
         phrase = "Tagged " + \
-                 str(num_items) + \
-                 " items successfully"
+                 str(tagged_items) + \
+                 " item successfully " + \
+            "out of " + str(total_items) + \
+                 " items"
+    elif tagged_items > 1 and tagged_items == total_items:
+        phrase = "Tagged " + \
+                 str(tagged_items) + \
+                 " items successfully " + \
+                 "out of " + str(total_items) + \
+                 " items"
+    elif tagged_items == 1 and tagged_items != total_items:
+        phrase = "Tagged " + \
+                 str(tagged_items) + \
+                 " items successfully " + \
+                 "out of " + str(total_items) + \
+                 " items. May be worth checking logs to see why they didn't " + \
+                 "get tagged!"
+    elif tagged_items > 1 and tagged_items != total_items:
+        phrase = "Tagged " + \
+                 str(tagged_items) + \
+                 " items successfully " + \
+                 "out of " + str(total_items) + \
+                 " items. May be worth checking logs to see why they didn't " + \
+                 "get tagged!"
+    elif tagged_items == 0 and total_items > 0:
+        phrase = "There were " + str(total_items) + \
+            " new items but they did not get tagged. May be worth checking logs why they didn't" + \
+            " get tagged!"
     else:
         phrase = "No new/untagged items since last function invocation"
 
